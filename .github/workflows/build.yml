@@ -252,12 +252,10 @@ jobs:
         # 4. Ensure CONFIG_LOCALVERSION is empty (no extra suffix)
         scripts/config --set-str LOCALVERSION ""
 
-        # 5. Commit all changes — Bazel requires clean git tree
-        cd "${{ github.workspace }}/kernel/common"
-        git config user.email "builder@wildkernels.local"
-        git config user.name "WildKernels Builder"
-        git add -A
-        git commit -m "pixel6: stock mimicry (SUBLEVEL=99, LOCALVERSION, SUS_MOUNT off)" || echo "(nothing to commit)"
+        # 5. Bypass "source tree not clean" — Bazel out-of-tree build needs .config placeholder
+        touch .config
+        echo "" > .scmversion
+
         echo "=== Pixel 6 mimicry applied ==="
 
     - name: Scan and collect patch rejects
