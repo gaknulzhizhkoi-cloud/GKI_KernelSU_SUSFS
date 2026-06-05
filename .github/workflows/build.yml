@@ -252,8 +252,9 @@ jobs:
         # 4. Ensure CONFIG_LOCALVERSION is empty (no extra suffix)
         scripts/config --set-str LOCALVERSION ""
 
-        # 5. Nuke "source tree not clean" check — Bazel sandbox ignores .config placeholder
-        sed -i '/The source tree is not clean/,/\/bin\/false/d' Makefile
+        # 5. Nuke "source tree not clean" — replace /bin/false with /bin/true
+        sed -i 's|/bin/false|/bin/true|g' Makefile
+        grep -n "bin/true\|bin/false" Makefile | head -3
 
         echo "=== Pixel 6 mimicry applied ==="
 
