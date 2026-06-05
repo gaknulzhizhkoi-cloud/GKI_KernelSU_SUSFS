@@ -88,6 +88,18 @@ jobs:
       shell: bash
       run: |
         set -x
+        # Pixel 6 stock mimicry: use exact stock build timestamp
+        if [[ "${{ inputs.sublevel }}" == "99" && "${{ inputs.os_patch_level }}" == "2025-05" ]]; then
+          SOURCE_DATE_EPOCH=$(date -u -d "2025-01-21 13:39:43 UTC" +%s)
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+          KBUILD_TS=$(date -u -d @${SOURCE_DATE_EPOCH} '+%a %b %d %H:%M:%S UTC %Y')
+          echo "KBUILD_BUILD_TIMESTAMP=${KBUILD_TS}" >> $GITHUB_ENV
+          GIT_DATE=$(date -u -d @${SOURCE_DATE_EPOCH} '+%Y-%m-%dT%H:%M:%SZ')
+          echo "GIT_COMMITTER_DATE=${GIT_DATE}" >> $GITHUB_ENV
+          echo "GIT_AUTHOR_DATE=${GIT_DATE}" >> $GITHUB_ENV
+          echo "Build timestamp set to: $(date -u -d @${SOURCE_DATE_EPOCH} '+%Y-%m-%d %H:%M:%S UTC') (epoch: $SOURCE_DATE_EPOCH) [STOCK MIMIC]"
+          exit 0
+        fi
         # Hardcode the build timestamp to the 5th day of the patch level
         # at 04:20 UTC, using the existing timestamp formats expected by the build.
         OS_PATCH_LEVEL_INPUT="${{ inputs.os_patch_level }}"
@@ -215,6 +227,31 @@ jobs:
 
     - name: Clean Kernel Flags
       uses: ./.github/actions/clean-kernel-flags
+
+    - name: 'Pixel 6 Stock Mimicry (SUBLEVEL spoof + LOCALVERSION + SUS_MOUNT disable)'
+      if: inputs.sublevel == '99' && inputs.os_patch_level == '2025-05'
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        set -eux
+        echo "=== Pixel 6 BP1A.250505.005 Stock Mimicry ==="
+
+        # 1. SUBLEVEL spoof: kernel source is 6.1.134, device has 6.1.99
+        sed -i 's/^SUBLEVEL = 134/SUBLEVEL = 99/' Makefile
+        grep "^SUBLEVEL" Makefile
+
+        # 2. Stock LOCALVERSION override (overwrites Wild branding)
+        echo 'echo "-android14-11-gd7dac4b14270-ab12946699"' > scripts/setlocalversion
+        chmod +x scripts/setlocalversion
+        echo "LOCALVERSION: $(bash scripts/setlocalversion)"
+
+        # 3. Disable SUS_MOUNT (USB OTG kernel panic)
+        sed -i '/CONFIG_KSU_SUSFS_SUS_MOUNT=y/d' arch/arm64/configs/gki_defconfig
+        echo '# CONFIG_KSU_SUSFS_SUS_MOUNT is not set' >> arch/arm64/configs/gki_defconfig
+
+        # 4. Ensure CONFIG_LOCALVERSION is empty (no extra suffix)
+        scripts/config --set-str LOCALVERSION ""
+        echo "=== Pixel 6 mimicry applied ==="
 
     - name: Scan and collect patch rejects
       id: scan
