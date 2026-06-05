@@ -252,9 +252,9 @@ jobs:
         # 4. Ensure CONFIG_LOCALVERSION is empty (no extra suffix)
         scripts/config --set-str LOCALVERSION ""
 
-        # 5. Nuke "source tree not clean" — replace /bin/false with /bin/true
-        sed -i 's|/bin/false|/bin/true|g' Makefile
-        grep -n "bin/true\|bin/false" Makefile | head -3
+        # 5. Nuke "source tree not clean" — run make mrproper to satisfy Bazel
+        make ARCH=arm64 LLVM=1 mrproper 2>/dev/null || true
+        echo "mrproper done, exit: $?"
 
         echo "=== Pixel 6 mimicry applied ==="
 
