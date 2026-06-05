@@ -252,9 +252,8 @@ jobs:
         # 4. Ensure CONFIG_LOCALVERSION is empty (no extra suffix)
         scripts/config --set-str LOCALVERSION ""
 
-        # 5. Bypass "source tree not clean" — Bazel out-of-tree build needs .config placeholder
-        touch .config
-        echo "" > .scmversion
+        # 5. Nuke "source tree not clean" check — Bazel sandbox ignores .config placeholder
+        sed -i '/The source tree is not clean/,/\/bin\/false/d' Makefile
 
         echo "=== Pixel 6 mimicry applied ==="
 
