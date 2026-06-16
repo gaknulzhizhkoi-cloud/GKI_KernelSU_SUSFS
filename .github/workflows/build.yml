@@ -160,13 +160,6 @@ jobs:
         sublevel: ${{ steps.extract.outputs.sublevel }}
 
 
-    - name: Enhanced SUSFS (KSTAT_REDIRECT + UNICODE_FILTER, no HARDENED/HIDDEN_NAME)
-      if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
-      shell: bash
-      working-directory: ${{ github.workspace }}/kernel/common
-      run: |
-        patch -p1 -F3 --no-backup-if-mismatch < "${{ github.workspace }}/.github/patches/51_safe_susfs-android14-6.1.patch"
-        echo "Enhanced SUSFS (safe) applied"
 
     - name: Baseband Guard
       if: (contains(inputs.feature_set, 'BBG') || inputs.feature_set == 'FULL')
