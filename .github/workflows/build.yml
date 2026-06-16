@@ -159,6 +159,14 @@ jobs:
         os_patch_level: ${{ inputs.os_patch_level }}
         sublevel: ${{ steps.extract.outputs.sublevel }}
 
+    - name: ZeroMount (mountless module loading)
+      if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        patch -p1 -F3 --no-backup-if-mismatch < "${{ github.workspace }}/.github/patches/60_zeromount-android14-6.1.patch"
+        echo "ZeroMount patch applied"
+
     - name: Baseband Guard
       if: (contains(inputs.feature_set, 'BBG') || inputs.feature_set == 'FULL')
       uses: ./.github/actions/bbg
