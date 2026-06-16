@@ -236,7 +236,7 @@ jobs:
     - name: Clean Kernel Flags
       uses: ./.github/actions/clean-kernel-flags
 
-    - name: 'Pixel 6 Stock Mimicry (SUBLEVEL spoof + LOCALVERSION + SUS_MOUNT disable)'
+    - name: 'Pixel 6 Stock Mimicry (SUBLEVEL spoof + LOCALVERSION + identity)'
       if: inputs.sublevel == '99' && inputs.os_patch_level == '2025-05'
       shell: bash
       working-directory: ${{ github.workspace }}/kernel/common
@@ -253,18 +253,19 @@ jobs:
         chmod +x scripts/setlocalversion
         echo "LOCALVERSION: $(bash scripts/setlocalversion)"
 
-        # 3. Disable SUS_MOUNT (USB OTG kernel panic)
-        sed -i '/CONFIG_KSU_SUSFS_SUS_MOUNT=y/d' arch/arm64/configs/gki_defconfig
-        echo '# CONFIG_KSU_SUSFS_SUS_MOUNT is not set' >> arch/arm64/configs/gki_defconfig
+        # 3. Stock build identity (export so kernel Makefile picks it up)
+        export KBUILD_BUILD_USER=android-build
+        export KBUILD_BUILD_HOST=abfarm
+        echo "KBUILD_BUILD_USER=${KBUILD_BUILD_USER}" >> $GITHUB_ENV
+        echo "KBUILD_BUILD_HOST=${KBUILD_BUILD_HOST}" >> $GITHUB_ENV
 
-        # 4. Stock build identity
-        echo "KBUILD_BUILD_USER=android-build" >> $GITHUB_ENV
-        echo "KBUILD_BUILD_HOST=abfarm" >> $GITHUB_ENV
+        # 4. SUS_MOUNT re-enabled (was disabled for USB OTG panic — re-testing on 6.1.134)
+        echo "SUS_MOUNT: keeping default =y (was n, re-testing)"
 
         # 5. Ensure CONFIG_LOCALVERSION is empty (no extra suffix)
         scripts/config --set-str LOCALVERSION ""
 
-        # 5. Nuke "source tree not clean" — run make mrproper to satisfy Bazel
+        # 6. Nuke "source tree not clean" — run make mrproper to satisfy Bazel
         make ARCH=arm64 LLVM=1 mrproper 2>/dev/null || true
         echo "mrproper done, exit: $?"
 
