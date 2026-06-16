@@ -54,7 +54,9 @@ runs:
         SKIP_MRPROPER=1 \
         OUT_DIR="/home/runner/out" \
         LTO=thin \
-        BUILD_CONFIG=common/build.config.gki.aarch64 \
+        KBUILD_BUILD_USER="android-build" \
+        KBUILD_BUILD_HOST="abfarm" \
+        BUILD_CONFIG=common/build.config.gki.aarch64 \\
         build/build.sh -j"$(nproc)" \
         CC="/usr/bin/ccache clang" \
         CXX="/usr/bin/ccache clang+" \
