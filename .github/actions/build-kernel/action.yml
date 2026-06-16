@@ -73,6 +73,10 @@ runs:
             --config=fast \
             --config=stamp \
             --disk_cache=/home/runner/.cache/bazel \
+            --action_env=KBUILD_BUILD_USER \
+            --action_env=KBUILD_BUILD_HOST \
+            --action_env=KBUILD_BUILD_TIMESTAMP \
+            --action_env=SOURCE_DATE_EPOCH \
             //common:kernel_aarch64_dist \
             -- --destdir=/home/runner/out
         else
@@ -80,6 +84,10 @@ runs:
             --config=fast \
             --config=stamp \
             --disk_cache=/home/runner/.cache/bazel \
+            --action_env=KBUILD_BUILD_USER \
+            --action_env=KBUILD_BUILD_HOST \
+            --action_env=KBUILD_BUILD_TIMESTAMP \
+            --action_env=SOURCE_DATE_EPOCH \
             //common:kernel_aarch64_dist \
             -- --dist_dir=/home/runner/out
         fi
@@ -121,4 +129,3 @@ runs:
       set -euo pipefail
       cp ${{ github.action_path }}/patches/bypass.patch "${{ github.workspace }}/AnyKernel3/bypass.patch"
       patch -p1 < bypass.patch
-

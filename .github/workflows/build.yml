@@ -366,6 +366,8 @@ jobs:
       env:
         SOURCE_DATE_EPOCH: ${{ env.SOURCE_DATE_EPOCH }}
         KBUILD_BUILD_TIMESTAMP: ${{ env.KBUILD_BUILD_TIMESTAMP }}
+        KBUILD_BUILD_USER: ${{ env.KBUILD_BUILD_USER }}
+        KBUILD_BUILD_HOST: ${{ env.KBUILD_BUILD_HOST }}
       uses: ./.github/actions/build-kernel
       with:
         version: ${{ inputs.version }}
@@ -413,6 +415,8 @@ jobs:
       env:
         SOURCE_DATE_EPOCH: ${{ env.SOURCE_DATE_EPOCH }}
         KBUILD_BUILD_TIMESTAMP: ${{ env.KBUILD_BUILD_TIMESTAMP }}
+        KBUILD_BUILD_USER: ${{ env.KBUILD_BUILD_USER }}
+        KBUILD_BUILD_HOST: ${{ env.KBUILD_BUILD_HOST }}
       uses: ./.github/actions/build-kernel
       with:
         bypass: true
