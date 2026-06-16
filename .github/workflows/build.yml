@@ -245,8 +245,8 @@ jobs:
         set -eux
         echo "=== Pixel 6 BP1A.250505.005 Stock Mimicry ==="
 
-        # 1. SUBLEVEL spoof: kernel source is 6.1.134, device has 6.1.99
-        sed -i 's/^SUBLEVEL = 134/SUBLEVEL = 99/' Makefile
+        # 1. SUBLEVEL spoof: any source sublevel → stock 99
+        sed -i 's/^SUBLEVEL = .*/SUBLEVEL = 99/' Makefile
         grep "^SUBLEVEL" Makefile
 
         # 2. Stock LOCALVERSION override (overwrites Wild branding)
