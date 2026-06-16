@@ -167,6 +167,14 @@ jobs:
         patch -p1 -F3 --no-backup-if-mismatch < "${{ github.workspace }}/.github/patches/60_zeromount-android14-6.1.patch"
         echo "ZeroMount applied"
 
+    - name: Enhanced SUSFS (KSTAT_REDIRECT + UNICODE_FILTER, no HARDENED/HIDDEN_NAME)
+      if: contains(inputs.feature_set, 'SUSFS') || inputs.feature_set == 'FULL'
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        patch -p1 -F3 --no-backup-if-mismatch < "${{ github.workspace }}/.github/patches/51_safe_susfs-android14-6.1.patch"
+        echo "Enhanced SUSFS (safe) applied"
+
     - name: Baseband Guard
       if: (contains(inputs.feature_set, 'BBG') || inputs.feature_set == 'FULL')
       uses: ./.github/actions/bbg
@@ -253,7 +261,12 @@ jobs:
         chmod +x scripts/setlocalversion
         echo "LOCALVERSION: $(bash scripts/setlocalversion)"
 
-        # 3. Stock build identity (export so kernel Makefile picks it up)
+        # 3. Stock build identity — set in mkcompile_h (more reliable than env vars)
+        if [ -f "scripts/mkcompile_h" ]; then
+          sed -i 's|LINUX_COMPILE_BY=.*|LINUX_COMPILE_BY="android-build"|' scripts/mkcompile_h
+          sed -i 's|LINUX_COMPILE_HOST=.*|LINUX_COMPILE_HOST="abfarm"|' scripts/mkcompile_h
+          echo "Identity set in mkcompile_h"
+        fi
         export KBUILD_BUILD_USER=android-build
         export KBUILD_BUILD_HOST=abfarm
         echo "KBUILD_BUILD_USER=${KBUILD_BUILD_USER}" >> $GITHUB_ENV
